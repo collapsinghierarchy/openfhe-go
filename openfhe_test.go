@@ -1,6 +1,6 @@
 //go:build openfhe && cgo
 
-package main
+package openfhe
 
 import "testing"
 

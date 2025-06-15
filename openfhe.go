@@ -1,6 +1,6 @@
 //go:build openfhe && cgo
 
-package main
+package openfhe-go
 
 /*
 #cgo CFLAGS:   -I/usr/local/include -I/usr/local/include/openfhe/core -I/usr/local/include/openfhe/pke -I/usr/local/include/openfhe/ -I/usr/local/include/openfhe/binfhe
