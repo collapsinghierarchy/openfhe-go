@@ -1,3 +1,4 @@
+//go:build openfhe && cgo
 #include "openfhe_c.h"
 
 #include <openfhe/core/openfhecore.h>   // v1.3 header root

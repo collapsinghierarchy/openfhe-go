@@ -1,3 +1,4 @@
+//go:build openfhe && cgo
 #pragma once
 
 #include <stdint.h>
