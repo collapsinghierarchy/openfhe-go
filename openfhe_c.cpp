@@ -17,11 +17,17 @@ using namespace lbcrypto;
 #include <cstdlib>
 
 template <typename T>
-void serialize_to_vec(const T& obj, std::vector<uint8_t>& out) {
-    std::stringstream ss;
-    Serial::Serialize(obj, ss, SerType::BINARY);
-    auto s = ss.str();
-    out.assign(s.begin(), s.end());
+bool serialize_to_vec(const T& obj, std::vector<uint8_t>& out) {
+    try {
+        std::stringstream ss;
+        Serial::Serialize(obj, ss, SerType::BINARY);
+        auto s = ss.str();
+        out.assign(s.begin(), s.end());
+        return true;
+    } catch (...) {
+        out.clear();
+        return false;
+    }
 }
 
 template <typename T>
@@ -64,7 +70,11 @@ void go_keygen_ptr(void* ctx, void** pk_ptr, void** sk_ptr) {
 void go_pk_serialize(void* pk_ptr, uint8_t** buf, size_t* len) {
     auto& pk = *static_cast<PublicKey<DCRTPoly>*>(pk_ptr);
     std::vector<uint8_t> tmp;
-    serialize_to_vec(pk, tmp);
+    if (!serialize_to_vec(pk, tmp)) {
+        *buf = nullptr;
+        *len = 0;
+        return;
+    }
     *len = tmp.size();
     *buf = static_cast<uint8_t*>(malloc(*len));
     memcpy(*buf, tmp.data(), *len);
@@ -72,7 +82,10 @@ void go_pk_serialize(void* pk_ptr, uint8_t** buf, size_t* len) {
 
 void* go_pk_deserialize(void* ctx, const uint8_t* buf, size_t len) {
     auto pk = new PublicKey<DCRTPoly>();
-    deserialize_from_buf(*pk, buf, len);
+    if (!deserialize_from_buf(*pk, buf, len)) {
+        delete pk;
+        return nullptr;
+    }
     return pk;
 }
 
@@ -84,7 +97,11 @@ void go_pk_free(void* pk_ptr) {
 void go_sk_serialize(void* sk_ptr, uint8_t** buf, size_t* len) {
     auto& sk = *static_cast<PrivateKey<DCRTPoly>*>(sk_ptr);
     std::vector<uint8_t> tmp;
-    serialize_to_vec(sk, tmp);
+    if (!serialize_to_vec(sk, tmp)) {
+        *buf = nullptr;
+        *len = 0;
+        return;
+    }
     *len = tmp.size();
     *buf = static_cast<uint8_t*>(malloc(*len));
     memcpy(*buf, tmp.data(), *len);
@@ -92,7 +109,10 @@ void go_sk_serialize(void* sk_ptr, uint8_t** buf, size_t* len) {
 
 void* go_sk_deserialize(void* ctx, const uint8_t* buf, size_t len) {
     auto sk = new PrivateKey<DCRTPoly>();
-    deserialize_from_buf(*sk, buf, len);
+    if (!deserialize_from_buf(*sk, buf, len)) {
+        delete sk;
+        return nullptr;
+    }
     return sk;
 }
 
@@ -124,7 +144,11 @@ uint64_t go_decrypt_u64_ptr(void* ctx, void* sk_ptr, void* ct_ptr) {
 void go_ct_ser(void* ct_ptr, uint8_t** buf, size_t* len) {
     auto& ct = *static_cast<Ciphertext<DCRTPoly>*>(ct_ptr);
     std::vector<uint8_t> tmp;
-    serialize_to_vec(ct, tmp);
+    if (!serialize_to_vec(ct, tmp)) {
+        *buf = nullptr;
+        *len = 0;
+        return;
+    }
     *len = tmp.size();
     *buf = static_cast<uint8_t*>(malloc(*len));
     memcpy(*buf, tmp.data(), *len);
@@ -132,7 +156,10 @@ void go_ct_ser(void* ct_ptr, uint8_t** buf, size_t* len) {
 
 void* go_ct_deser(void* ctx, const uint8_t* buf, size_t len) {
     auto ct = new Ciphertext<DCRTPoly>();
-    deserialize_from_buf(*ct, buf, len);
+    if (!deserialize_from_buf(*ct, buf, len)) {
+        delete ct;
+        return nullptr;
+    }
     return ct;
 }
 

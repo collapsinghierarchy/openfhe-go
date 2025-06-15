@@ -149,3 +149,31 @@ func TestEvalAdd(t *testing.T) {
 		t.Fatalf("EvalAdd result mismatch: got %d, want 42", sum)
 	}
 }
+
+func TestDeserializeFailures(t *testing.T) {
+	ctx := NewBGVRNS(testDepth, testT)
+	defer ctx.Free()
+
+	// Try deserializing with empty data
+	if pk := DeserializePublicKey(ctx, nil); pk != nil {
+		t.Error("DeserializePublicKey should return nil for empty data")
+	}
+	if sk := DeserializeSecretKey(ctx, nil); sk != nil {
+		t.Error("DeserializeSecretKey should return nil for empty data")
+	}
+	if ct := DeserializeCiphertext(ctx, nil); ct != nil {
+		t.Error("DeserializeCiphertext should return nil for empty data")
+	}
+
+	// Try deserializing with invalid data
+	bad := []byte{1, 2, 3, 4}
+	if pk := DeserializePublicKey(ctx, bad); pk != nil {
+		t.Error("DeserializePublicKey should return nil for invalid data")
+	}
+	if sk := DeserializeSecretKey(ctx, bad); sk != nil {
+		t.Error("DeserializeSecretKey should return nil for invalid data")
+	}
+	if ct := DeserializeCiphertext(ctx, bad); ct != nil {
+		t.Error("DeserializeCiphertext should return nil for invalid data")
+	}
+}

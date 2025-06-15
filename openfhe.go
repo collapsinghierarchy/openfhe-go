@@ -65,15 +65,28 @@ func (pk *PublicKey) Serialize() ([]byte, error) {
 	var buf *C.uint8_t
 	var length C.size_t
 	C.go_pk_serialize(pk.ptr, &buf, &length)
-	defer C.go_buf_free(buf)
+	defer func() {
+		if buf != nil {
+			C.go_buf_free(buf)
+		}
+	}()
+	if buf == nil || length == 0 {
+		return nil, errors.New("public key serialization failed")
+	}
 	return C.GoBytes(unsafe.Pointer(buf), C.int(length)), nil
 }
 
 // DeserializePublicKey creates a PublicKey from serialized data
 func DeserializePublicKey(ctx *Context, data []byte) *PublicKey {
+	if ctx == nil || ctx.ptr == nil || len(data) == 0 {
+		return nil
+	}
 	ptr := C.go_pk_deserialize(ctx.ptr,
 		(*C.uint8_t)(unsafe.Pointer(&data[0])),
 		C.size_t(len(data)))
+	if ptr == nil {
+		return nil
+	}
 	return &PublicKey{ptr}
 }
 
@@ -104,15 +117,28 @@ func (sk *SecretKey) Serialize() ([]byte, error) {
 	var buf *C.uint8_t
 	var length C.size_t
 	C.go_sk_serialize(sk.ptr, &buf, &length)
-	defer C.go_buf_free(buf)
+	defer func() {
+		if buf != nil {
+			C.go_buf_free(buf)
+		}
+	}()
+	if buf == nil || length == 0 {
+		return nil, errors.New("secret key serialization failed")
+	}
 	return C.GoBytes(unsafe.Pointer(buf), C.int(length)), nil
 }
 
 // DeserializeSecretKey creates a SecretKey from serialized data
 func DeserializeSecretKey(ctx *Context, data []byte) *SecretKey {
+	if ctx == nil || ctx.ptr == nil || len(data) == 0 {
+		return nil
+	}
 	ptr := C.go_sk_deserialize(ctx.ptr,
 		(*C.uint8_t)(unsafe.Pointer(&data[0])),
 		C.size_t(len(data)))
+	if ptr == nil {
+		return nil
+	}
 	return &SecretKey{ptr}
 }
 
@@ -143,15 +169,28 @@ func (ct *Ciphertext) Serialize() ([]byte, error) {
 	var buf *C.uint8_t
 	var length C.size_t
 	C.go_ct_ser(ct.ptr, &buf, &length)
-	defer C.go_buf_free(buf)
+	defer func() {
+		if buf != nil {
+			C.go_buf_free(buf)
+		}
+	}()
+	if buf == nil || length == 0 {
+		return nil, errors.New("ciphertext serialization failed")
+	}
 	return C.GoBytes(unsafe.Pointer(buf), C.int(length)), nil
 }
 
 // DeserializeCiphertext creates a Ciphertext from serialized data
 func DeserializeCiphertext(ctx *Context, data []byte) *Ciphertext {
+	if ctx == nil || ctx.ptr == nil || len(data) == 0 {
+		return nil
+	}
 	ptr := C.go_ct_deser(ctx.ptr,
 		(*C.uint8_t)(unsafe.Pointer(&data[0])),
 		C.size_t(len(data)))
+	if ptr == nil {
+		return nil
+	}
 	return &Ciphertext{ptr}
 }
 
